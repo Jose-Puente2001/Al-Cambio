@@ -1,6 +1,9 @@
-# alcambio (alcambio)
+<h1 align="center">
+Al Cambio 
+</h1>
 
 App para conocer el cambio de Bolívar a Dólares
+
 
 ## Install the dependencies
 ```bash
