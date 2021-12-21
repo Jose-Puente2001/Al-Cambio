@@ -17,16 +17,17 @@
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
       <q-list>
         <q-item-label header> Menú </q-item-label>
+
         <q-dialog v-model="exchangeRateModalOpen" persistent>
           <q-card style="min-width: 350px">
             <q-card-section>
               <div class="text-h6">Tasa de cambio</div>
             </q-card-section>
-
             <q-card-section class="q-pt-none">
               <q-option-group
                 v-model="exchangeHouse"
                 :options="options"
+                inline
                 color="primary"
               />
               <q-input class="q-px-md" v-if="exchangeHouse=='custom_rate'"
@@ -36,12 +37,11 @@
                 type="number"
                 :min="0"
                 :rules="[val => val !== '' && !isNaN(val) || 'Por favor, escribe una tasa válida']"
+                @change="val => val == '' ? myRate = 0 : val"
               />
             </q-card-section>
-
             <q-card-actions align="right" class="text-primary">
-              <q-btn flat label="Cancelar" v-close-popup />
-              <q-btn flat label="Actualizar tasa" @click="updateExchangeRate"/>
+              <q-btn flat label="Cerrar" v-close-popup />
             </q-card-actions>
           </q-card>
         </q-dialog>
@@ -54,7 +54,6 @@
             <q-item-label>Tasa de cambio</q-item-label>
           </q-item-section>
         </q-item>
-
       </q-list>
     </q-drawer>
 
@@ -74,9 +73,34 @@ export default defineComponent({
 
   data() {
     return {
-      exchangeHouse: 'dolar_today',
-      exchangeRate: 0,
+      exchangeHouse: 'dolartoday',
+      allHouses: [],
       myRate: 0,
+    }
+  },
+
+  computed: {
+    options: function() {
+      let options = [];
+      if (this.allHouses.length) {
+        options = this.allHouses.map(function(el) {
+          return { label: el.name, value: el.id }
+        })
+      }
+      options.push(
+        {
+          label: 'Personalizado',
+          value: 'custom_rate'
+        },
+      );
+      return options;
+    },
+    exchangeRate: function() {
+      if (this.options.length && this.exchangeHouse != 'custom_rate') {
+        return this.allHouses.find(el => el.id == this.exchangeHouse)?.price || 0
+      } else {
+        return parseFloat(this.myRate.toFixed(2));
+      }
     }
   },
 
@@ -92,13 +116,15 @@ export default defineComponent({
       } else {
         this.myRate = 0;
       }
+    },
+    getRates() {
+      return fetch('https://backend-alcambio.herokuapp.com/')
+        .then(response => response.json())
     }
   },
 
-  created() {
-    fetch('https://s3.amazonaws.com/dolartoday/data.json')
-      .then(response => response.json())
-      .then(data => this.exchangeRate = data.USD.dolartoday)      
+  async created() {
+    this.allHouses = await this.getRates();
   },
 
   setup() {
@@ -112,25 +138,6 @@ export default defineComponent({
       toggleLeftDrawer() {
         leftDrawerOpen.value = !leftDrawerOpen.value;
       },
-      options: [
-        {
-          label: 'Dolar Today',
-          value: 'dolar_today'
-        },
-        /*{
-          label: 'Banco Central de Venezuela',
-          value: 'bcv'
-        },
-        {
-          label: 'EnParalelo',
-          value: 'en_paralelo'
-        },
-        */
-        {
-          label: 'Personalizado',
-          value: 'custom_rate'
-        },
-      ]
     };
   },
 });

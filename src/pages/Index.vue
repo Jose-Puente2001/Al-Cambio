@@ -12,7 +12,7 @@
                 style="width: 20px; height: 20px"
               >
             </div>
-            <input v-model.number="USD" @change="changedUSD" type="number" class="form-control" min="0">
+            <input v-model.number="USD" @keyup="changedUSD" type="number" class="form-control" min="0">
           </div>
         </div>
         <div class="col-6">
@@ -25,7 +25,7 @@
                 style="width: 20px; height: 20px"
               >
             </div>
-            <input v-model.number="VES" @change="changedVES" type="number" class="form-control" min="0">
+            <input v-model.number="VES" @keyup="changedVES" type="number" class="form-control" min="0">
           </div>
         </div>
         <div class="col-12" id="exchange-rate">
@@ -79,11 +79,13 @@
 </template>
 
 <script>
+import { useQuasar } from 'quasar';
 import { defineComponent, ref } from 'vue';
 
 export default defineComponent({
   name: 'PageIndex',
   setup() {
+    const $q = useQuasar();
     return {
       opentuto: ref(false)
     } 
@@ -102,13 +104,20 @@ export default defineComponent({
       exchangeHouse: 'dolartoday',
     }
   },
-  
   methods: {
     addItem() {
-      this.items.unshift({
-        VES: this.VES,
-        USD: this.USD
-      })
+      if (parseFloat(this.VES) > 0) {
+        this.items.unshift({
+          VES: this.VES,
+          USD: this.USD
+        })
+      } else {
+        this.$q.notify({
+          message: 'Ingresa un valor válido.',
+          icon: 'announcement',
+          actions: [ { label: 'OK', color: 'white' } ]
+        });
+      }
     },
     changedVES() {
       this.USD = parseFloat((this.VES / this.exchangeRate).toFixed(2))
