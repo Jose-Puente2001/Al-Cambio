@@ -5,6 +5,9 @@ Al Cambio
 App para conocer el cambio de Bolívar a Dólares
 
 
+![Gif de como funciona el Proyecto](https://github.com/Jose-Puente2001/imagenes-de-proyectos/blob/main/RecordRTC-2021-12-21T12-59-51-669Z.gif)
+
+
 ## Install the dependencies
 ```bash
 yarn
